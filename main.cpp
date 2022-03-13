@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <math.h>
+#include <random>
+#include <time.h>
 #include "file.h"
 using namespace std;
 
@@ -11,9 +14,16 @@ float normalize(int x);
 int main (int argc, char *argv[]) {
     const int N = 1000;   // num files originally in origin servers
     int lambda;     // num requests made per second
+    float accBand = 15.0f;   // Mbps
+    float inBand = 100.0f;    // Mbps
+    
+    mt19937 rand(time(NULL));
+    lognormal_distribution<float> propTime(0.0, 1.0); // mean, SD  in nanoseconds
+    float transRate = 20.0f;    // Mbps
 
     vector<int> origin;     // list of i at the origin
     vector<int> cache;      // list of i in the cache
+    queue<int> queue;       // list of i waiting at access queue
 
     File* files = new File[N];            // list of files
 
@@ -25,18 +35,19 @@ int main (int argc, char *argv[]) {
 }
 
 void initializeFiles(File* files, int N) {
-    int mean = 1; //MB
-    int alphaS = - (1 - mean) / mean; // 0
-    int alphaP = 0.1;
+    float alphaS = 2.0;
+    float alphaP = 1.1;
+    float modeS = 10.0;
+    float modeP = 10.0;
     float sumq = 0.0f;
     // Initialize sizes
     for (int i = 0; i < N; i++) {
-        float s = 1.0 / pow(normalize(i), alphaS + 1);
+        float s = alphaS * pow(modeS, alphaS) / pow(normalize(i), alphaS + 1);
         files[i].setSize(s);
     }
     // Initialize popularities
     for (int i = 0; i < N; i++) {
-        float p = (1.0 / pow(normalize(i), alphaP + 1));
+        float p = alphaP * pow(modeP, alphaP) / pow(normalize(i), alphaP + 1);
         sumq += p;
         files[i].setPopularity(p);
     }
