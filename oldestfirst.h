@@ -1,6 +1,8 @@
 #include "file.h"
 #include <queue>
+#include <random>
 #include <vector>
+#include <time.h>
 #include "json/json.h"
 using namespace std;
 
@@ -13,8 +15,13 @@ class OldestFirst {
 
     vector<float> responseTimes;
 
+    void newRequestEvent(int index, lognormal_distribution<float>*);
+    void fileReceivedEvent(int index);
+    void arriveAtQueueEvent(int index);
+    void departQueueEvent(int index);
+
     public:
+        OldestFirst();
         OldestFirst(File* files, Json::Value* params);
         void simulate();
-        void newRequestEvent(int index);
 };
