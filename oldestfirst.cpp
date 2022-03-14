@@ -1,6 +1,6 @@
 #include "file.h"
 #include "oldestfirst.h"
-#include "parameters.h"
+#include <random>
 #include <time.h>
 #include <iostream>
 #include <vector>
@@ -8,27 +8,32 @@
 #include <queue>
 #include <chrono>
 #include <array>
+#include "json/json.h"
 using namespace std;
 
-OldestFirst::OldestFirst(File* files) {
-    this->params = new Parameters();
+OldestFirst::OldestFirst(File* files, Json::Value* params) {
+    this->params = params;
     this->files = files;
 }
 
 void OldestFirst::simulate() {
 
+    // Generate distributions
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     default_random_engine gen(seed);
-    lognormal_distribution<float> propTime(0.0, 1.0); // mean, SD  in nanoseconds
-    poisson_distribution<int> poisson(params->lambda); 
+    Json::Value prop = (*params)["prop"];
+    lognormal_distribution<float> propTime(prop["mean"].asFloat(), prop["sd"].asFloat()); // mean, SD  in nanoseconds
+    poisson_distribution<int> poisson((*params)["lambda"].asInt()); 
 
-    array<float, 1000> probs;
-    for (int i = 0; i < params->N; i++) {
-        probs.at(i) = files[i].getPopularity();
+    // Use weighted probabilities from Pareto
+    vector<float> probs;
+    for (int i = 0; i < (*params)["N"].asInt(); i++) {
+        probs.push_back(files[i].getPopularity());
     }
     discrete_distribution<int> fileSelect(probs.begin(), probs.end());
 
-    for (int iter = 0; iter < params->testIterations; iter++) {
+    // Generate request events
+    for (int iter = 0; iter < (*params)["testIterations"].asInt(); iter++) {
         for (int req = 0; req < poisson(gen); req++) {
             newRequestEvent(fileSelect(gen));
         }

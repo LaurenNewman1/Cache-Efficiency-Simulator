@@ -1,3 +1,3 @@
 main:
-	gcc main.cpp file.cpp oldestfirst.cpp parameters.cpp -o out/program -lstdc++
-	out/program
+	gcc main.cpp file.cpp oldestfirst.cpp json/jsoncpp.cpp -o out/program -lstdc++
+	out/program parameters.json

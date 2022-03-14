@@ -1,0 +1,14 @@
+{
+    "N": 1000,
+    "C": 50,
+    "lambda": 10,
+    "accBand": 10.0,
+    "inBand": 100.0,
+    "transRate": 20.0,
+    "testIterations": 10,
+    "propTime":
+    {
+        "mean": 0.0,
+        "sd": 1.0
+    }
+}

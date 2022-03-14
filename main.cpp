@@ -4,22 +4,40 @@
 #include <math.h>
 #include <random>
 #include <time.h>
+#include <fstream>
+#include <string>
 #include "file.h"
 #include "oldestfirst.h"
-#include "parameters.h"
+#include "json/json.h"
 using namespace std;
 
 void initializeFiles(File* files, int N);
 void printFiles(File* files, int N);
 float normalize(int x);
+Json::Value* readParameters(string filename);
 
 int main (int argc, char *argv[]) {
-    const int N = 1000;   // num files originally in origin servers
-    File* files = new File[N];            // list of files
+    if (argc != 2) {
+        cout << "Error: must provide json file with parameters";
+    }
 
-    initializeFiles(files, N);
+    ifstream params_file(argv[1]);
+    stringstream buffer;
+    buffer << params_file.rdbuf();
 
-    OldestFirst* sim1 = new OldestFirst(files);
+    Json::Reader reader;
+    Json::Value params;
+    bool parseSuccess = reader.parse(buffer.str(), params, false);
+    if (!parseSuccess)
+    {
+        cout << "Failed to read parameter file" << endl;
+    }
+
+    File* files = new File[params["N"].asInt()];            // list of files
+
+    initializeFiles(files, params["N"].asInt());
+
+    OldestFirst* sim1 = new OldestFirst(files, &params);
     sim1->simulate();
 
     //printFiles(files, N);
