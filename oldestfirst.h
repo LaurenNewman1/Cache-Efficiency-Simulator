@@ -4,6 +4,7 @@
 #include <vector>
 #include <time.h>
 #include "json/json.h"
+#include "request.h"
 using namespace std;
 
 class OldestFirst {
@@ -11,14 +12,15 @@ class OldestFirst {
     Json::Value* params;
     vector<int> origin;     // list of i at the origin
     vector<int> cache;      // list of i in the cache
-    queue<int> queue;       // list of i waiting at access queue
+    float cacheContents;
+    queue<Request*> queue;       // list of i waiting at access queue
 
-    vector<float> responseTimes;
+    vector<Request*> requests;
 
-    void newRequestEvent(int index, lognormal_distribution<float>*);
-    void fileReceivedEvent(int index);
-    void arriveAtQueueEvent(int index);
-    void departQueueEvent(int index);
+    void newRequestEvent(Request* req);
+    void fileReceivedEvent(Request* req);
+    void arriveAtQueueEvent(Request* req);
+    void departQueueEvent(Request* req);
 
     public:
         OldestFirst();
