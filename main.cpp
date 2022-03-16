@@ -9,6 +9,7 @@
 #include "file.h"
 #include "oldestfirst.h"
 #include "json/json.h"
+#include "logger/Logger.h"
 using namespace std;
 
 void initializeFiles(File* files, int N);
@@ -21,6 +22,9 @@ int main (int argc, char *argv[]) {
         cout << "Error: must provide json file with parameters";
     }
 
+    CPlusPlusLogging::Logger* logger = NULL; // Create the object pointer for Logger Class
+    logger = CPlusPlusLogging::Logger::getInstance();
+
     ifstream params_file(argv[1]);
     stringstream buffer;
     buffer << params_file.rdbuf();
@@ -30,7 +34,10 @@ int main (int argc, char *argv[]) {
     bool parseSuccess = reader.parse(buffer.str(), params, false);
     if (!parseSuccess)
     {
-        cout << "Failed to read parameter file" << endl;
+        logger->error("Failed to read parameter file");
+    }
+    else {
+        logger->info(buffer.str());
     }
 
     File* files = new File[params["N"].asInt()];            // list of files
