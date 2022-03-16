@@ -1,5 +1,4 @@
-Wed Mar 16 14:37:28 2022  [INFO]: test
-Wed Mar 16 14:47:16 2022  [INFO]: {
+Wed Mar 16 15:53:35 2022  [INFO]: {
     "N": 1000,
     "C": 50,
     "lambda": 10,
@@ -13,3 +12,225 @@ Wed Mar 16 14:47:16 2022  [INFO]: {
         "sd": 1.0
     }
 }
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 0
+	index: 2
+	result: not found in cache
+	time: 0
+
+Wed Mar 16 15:53:35 2022  [INFO]: Arrived at Queue Event: 
+	id: 0
+	index: 2
+	result: nothing in queue
+	time: 1
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 0
+	index: 2
+	result: space available; adding file to cache
+	time: 3.89352
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 0
+	index: 2
+	result: file received
+	time: 4.18287
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 0
+	index: 2
+	result: found in cache
+	time: 4.22669
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 0
+	index: 2
+	result: file received
+	time: 4.51604
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 1
+	index: 61
+	result: not found in cache
+	time: 4.51604
+
+Wed Mar 16 15:53:35 2022  [INFO]: Arrived at Queue Event: 
+	id: 1
+	index: 61
+	result: nothing in queue
+	time: 5.51604
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 1
+	index: 61
+	result: space available; adding file to cache
+	time: 5.53001
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 1
+	index: 61
+	result: file received
+	time: 5.53141
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 1
+	index: 61
+	result: found in cache
+	time: 5.64442
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 1
+	index: 61
+	result: file received
+	time: 5.64582
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 2
+	index: 15
+	result: not found in cache
+	time: 5.64582
+
+Wed Mar 16 15:53:35 2022  [INFO]: Arrived at Queue Event: 
+	id: 2
+	index: 15
+	result: nothing in queue
+	time: 6.64582
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 2
+	index: 15
+	result: space available; adding file to cache
+	time: 6.96582
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 2
+	index: 15
+	result: file received
+	time: 6.99782
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 2
+	index: 15
+	result: found in cache
+	time: 7.10927
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 2
+	index: 15
+	result: file received
+	time: 7.14127
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 3
+	index: 1
+	result: not found in cache
+	time: 7.14127
+
+Wed Mar 16 15:53:35 2022  [INFO]: Arrived at Queue Event: 
+	id: 3
+	index: 1
+	result: nothing in queue
+	time: 8.14127
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 3
+	index: 1
+	result: making room in cache
+	time: 11.8978
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 3
+	index: 1
+	result: space available; adding file to cache
+	time: 11.8978
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 3
+	index: 1
+	result: file received
+	time: 12.2735
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 3
+	index: 1
+	result: found in cache
+	time: 12.3849
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 3
+	index: 1
+	result: file received
+	time: 12.7606
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 4
+	index: 5
+	result: not found in cache
+	time: 12.7606
+
+Wed Mar 16 15:53:35 2022  [INFO]: Arrived at Queue Event: 
+	id: 4
+	index: 5
+	result: nothing in queue
+	time: 13.7606
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 4
+	index: 5
+	result: making room in cache
+	time: 15.2421
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 4
+	index: 5
+	result: making room in cache
+	time: 15.2421
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 4
+	index: 5
+	result: making room in cache
+	time: 15.2421
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 4
+	index: 5
+	result: space available; adding file to cache
+	time: 15.2421
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 4
+	index: 5
+	result: file received
+	time: 15.3902
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 4
+	index: 5
+	result: found in cache
+	time: 15.5017
+
+Wed Mar 16 15:53:35 2022  [INFO]: File Received Event: 
+	id: 4
+	index: 5
+	result: file received
+	time: 15.6498
+
+Wed Mar 16 15:53:35 2022  [INFO]: New Request Event: 
+	id: 5
+	index: 0
+	result: not found in cache
+	time: 15.6498
+
+Wed Mar 16 15:53:35 2022  [INFO]: Arrived at Queue Event: 
+	id: 5
+	index: 0
+	result: nothing in queue
+	time: 16.6498
+
+Wed Mar 16 15:53:35 2022  [INFO]: Depart Queue Event: 
+	id: 5
+	index: 0
+	result: making room in cache
+	time: 21.6498
+

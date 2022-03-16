@@ -18,8 +18,8 @@ float normalize(int x);
 Json::Value* readParameters(string filename);
 
 int main (int argc, char *argv[]) {
-    if (argc != 2) {
-        cout << "Error: must provide json file with parameters";
+    if (argc != 3) {
+        cout << "Error: must provide json file with parameters and simulation type";
     }
 
     CPlusPlusLogging::Logger* logger = NULL; // Create the object pointer for Logger Class
@@ -44,8 +44,10 @@ int main (int argc, char *argv[]) {
 
     initializeFiles(files, params["N"].asInt());
 
-    OldestFirst* sim1 = new OldestFirst(files, &params);
-    sim1->simulate();
+    if (string(argv[2]) == "oldestfirst") {
+        OldestFirst* sim1 = new OldestFirst(files, &params, logger);
+        sim1->simulate();
+    }
 
     //printFiles(files, N);
 

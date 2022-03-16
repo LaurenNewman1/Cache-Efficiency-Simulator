@@ -5,6 +5,7 @@
         "vector": "cpp",
         "chrono": "cpp",
         "iostream": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "xstring": "cpp"
     }
 }
