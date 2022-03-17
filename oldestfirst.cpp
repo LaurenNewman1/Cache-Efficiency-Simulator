@@ -32,14 +32,19 @@ void simulateOldestFirst(File* files, Json::Value* params, CPlusPlusLogging::Log
     discrete_distribution<int> fileSelect(probs.begin(), probs.end());
 
     // Generate request events
-    for (int req = 0; req < poisson(gen); req++) {
-        Event* ev = new Event();
-        ev->index = fileSelect(gen);
-        ev->key = currTime;
-        ev->startTime = currTime;
-        ev->func = newRequestEvent;
-        event_enqueue(ev, &eventTree);
+    int reqPerSec = poisson(gen);
+    for (int sec = 0; sec < (*params)["totalTime"].asFloat(); sec++) {
+        for (int req = 0; req < reqPerSec; req++) {
+            Event* ev = new Event();
+            ev->index = fileSelect(gen);
+            ev->key = sec;
+            ev->startTime = sec;
+            ev->func = newRequestEvent;
+            event_enqueue(ev, &eventTree);
+        }
     }
+
+    // Main event loop
     while (currTime < (*params)["totalTime"].asFloat()) {
         Event* ev = event_dequeue(&eventTree);
         if (ev == NULL) {
