@@ -5,7 +5,7 @@
     "accBand": 10.0,
     "inBand": 100.0,
     "transRate": 20.0,
-    "testIterations": 10,
+    "totalTime": 50.0,
     "propTime":
     {
         "mean": 0.0,

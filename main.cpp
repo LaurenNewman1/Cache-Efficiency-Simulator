@@ -45,8 +45,7 @@ int main (int argc, char *argv[]) {
     initializeFiles(files, params["N"].asInt());
 
     if (string(argv[2]) == "oldestfirst") {
-        OldestFirst* sim1 = new OldestFirst(files, &params, logger);
-        sim1->simulate();
+        simulateOldestFirst(files, &params, logger);
     }
 
     //printFiles(files, N);
