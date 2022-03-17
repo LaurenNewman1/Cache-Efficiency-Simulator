@@ -1,5 +1,5 @@
 #include "file.h"
-#include "oldestfirst.h"
+#include "simulation.h"
 #include <random>
 #include <time.h>
 #include <iostream>
@@ -15,9 +15,9 @@
 #include "event.cpp"
 using namespace std;
 
-void simulateOldestFirst(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger) {
+void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm) {
 
-    initialize(files, params, logger);
+    initialize(files, params, logger, algorithm);
 
     // Generate distributions
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
@@ -48,12 +48,14 @@ void simulateOldestFirst(File* files, Json::Value* params, CPlusPlusLogging::Log
     while (currTime < (*params)["totalTime"].asFloat()) {
         Event* ev = event_dequeue(&eventTree);
         if (ev == NULL) {
-            logger->info("Queue empty!");
+            logger->info("Queue empty! Simulation ended.");
             break;
         }
         currTime = ev->key;
         (*(ev->func))(ev);
     }
+
+    logger->info("Reached the end of totalTime parameter. Simulation ended.");
 
     stringstream log;
     log << "results..." << endl;
@@ -63,12 +65,15 @@ void simulateOldestFirst(File* files, Json::Value* params, CPlusPlusLogging::Log
     logger->info(log.str());
 };
 
-static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l) {
+static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, string a) {
     files = f;
     params = p;
     logger = l;
     currTime = 0.0;
     cacheContents = 0.0;
+    if (a == "oldestfirst") {
+        algorithm = oldestfirst;
+    }
     event_queue_init(&eventTree);
 }
 
@@ -135,8 +140,11 @@ static void departQueueEvent(Event* ev) {
     q.pop();
     // make room for new file in cache
     while (cacheContents + files[ev->index].getSize() > (*params)["C"].asFloat()) {
-        cacheContents -= files[cache.front()].getSize();
-        cache.erase(cache.begin());
+        switch (algorithm) {
+            case oldestfirst: {
+                oldestFirst();
+            }
+        }
         logger->info(getLogMessage(ev, 5));
     }
     // add to cache
@@ -161,6 +169,11 @@ static void departQueueEvent(Event* ev) {
         event_enqueue(newEv, &eventTree);
     }
 };
+
+static void oldestFirst() {
+    cacheContents -= files[cache.front()].getSize();
+    cache.erase(cache.begin());
+}
 
 static string getLogMessage(Event* ev, int type) {
     stringstream log;

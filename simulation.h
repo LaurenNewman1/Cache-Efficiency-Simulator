@@ -9,7 +9,10 @@
 #include "event.h"
 using namespace std;
 
+enum Algorithm { oldestfirst };
+
 static float currTime;
+static int algorithm;
 static File* files;
 static Json::Value* params;
 static vector<int> cache;      // list of i in the cache
@@ -21,7 +24,7 @@ static Event_Struct *eventTree;
 
 static std::multimap<int, float> responses;
 
-static void initialize(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger);
+static void initialize(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string a);
 
 static void newRequestEvent(Event* ev);
 static void fileReceivedEvent(Event* ev);
@@ -30,4 +33,6 @@ static void departQueueEvent(Event* ev);
 
 static string getLogMessage(Event* ev, int type);
 
-void simulateOldestFirst(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger);
+void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm);
+
+static void oldestFirst();

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <string>
 #include "file.h"
-#include "oldestfirst.h"
+#include "simulation.h"
 #include "json/json.h"
 #include "logger/Logger.h"
 using namespace std;
@@ -45,7 +45,10 @@ int main (int argc, char *argv[]) {
     initializeFiles(files, params["N"].asInt());
 
     if (string(argv[2]) == "oldestfirst") {
-        simulateOldestFirst(files, &params, logger);
+        simulate(files, &params, logger, "oldestfirst");
+    }
+    else {
+        cout << "Error: Invalid replacement algorith. Try \"oldestfirst\"" << endl;
     }
 
     //printFiles(files, N);
