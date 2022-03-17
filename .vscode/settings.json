@@ -6,6 +6,7 @@
         "chrono": "cpp",
         "iostream": "cpp",
         "iosfwd": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "ostream": "cpp"
     }
 }

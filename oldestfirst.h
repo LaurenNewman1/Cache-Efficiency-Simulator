@@ -19,7 +19,7 @@ static CPlusPlusLogging::Logger* logger;
 
 static Event_Struct *eventTree;
 
-static std::map<int, float> responses;
+static std::multimap<int, float> responses;
 
 static void initialize(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger);
 

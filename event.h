@@ -10,6 +10,6 @@ typedef struct Event_Struct {
 
     int index; // file
     void (*func)(struct Event_Struct *); 
-    float endTime;
+    float startTime;
     float responseTime;
 } Event;

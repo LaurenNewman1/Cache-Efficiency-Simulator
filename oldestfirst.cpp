@@ -36,6 +36,7 @@ void simulateOldestFirst(File* files, Json::Value* params, CPlusPlusLogging::Log
         Event* ev = new Event();
         ev->index = fileSelect(gen);
         ev->key = currTime;
+        ev->startTime = currTime;
         ev->func = newRequestEvent;
         event_enqueue(ev, &eventTree);
     }
@@ -48,6 +49,13 @@ void simulateOldestFirst(File* files, Json::Value* params, CPlusPlusLogging::Log
         currTime = ev->key;
         (*(ev->func))(ev);
     }
+
+    stringstream log;
+    log << "results..." << endl;
+    for (auto const &pair: responses) {
+        log << "{" << pair.first << ": " << pair.second << "}\n";
+    }
+    logger->info(log.str());
 };
 
 static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l) {
@@ -66,6 +74,7 @@ static void newRequestEvent(Event* ev) {
         Event* newEv = new Event();
         newEv->index = ev->index;
         newEv->key = ev->key + files[ev->index].getSize() / (*params)["inBand"].asFloat();
+        newEv->startTime = ev->startTime;
         newEv->func = fileReceivedEvent;
         event_enqueue(newEv, &eventTree);
     }
@@ -79,30 +88,34 @@ static void newRequestEvent(Event* ev) {
         Event* newEv = new Event();
         newEv->index = ev->index;
         newEv->key = ev->key + propTime(gen);
+        newEv->startTime = ev->startTime;
         newEv->func = arriveAtQueueEvent;
         event_enqueue(newEv, &eventTree);
 
-        exponential_distribution<float> X((*params)["lambda"].asFloat());
-        Event* newEv2 = new Event();
-        newEv2->index = ev->index;
-        newEv2->key = ev->key + X(gen);
-        newEv2->func = newRequestEvent;
-        event_enqueue(newEv2, &eventTree);
+        // exponential_distribution<float> X((*params)["lambda"].asFloat());
+        // Event* newEv2 = new Event();
+        // newEv2->index = ev->index;
+        // newEv2->key = ev->key + X(gen);
+        // newEv2->startTime = ev->startTime;
+        // newEv2->func = newRequestEvent;
+        // event_enqueue(newEv2, &eventTree);
     }
 };
 
 static void fileReceivedEvent(Event* ev) {
     logger->info(getLogMessage(ev, 2));
-    responses.insert(std::pair<int, float>(ev->index, 0)); //TODO
+    responses.insert(std::pair<int, float>(ev->index, currTime - ev->startTime));
 };
 
 static void arriveAtQueueEvent(Event* ev) {
     // if nothing in queue, depart
     if (q.empty()) {
+        q.push(ev);
         logger->info(getLogMessage(ev, 3));
         Event* newEv = new Event();
         newEv->index = ev->index;
         newEv->key = ev->key + files[ev->index].getSize() / (*params)["accBand"].asFloat();
+        newEv->startTime = ev->startTime;
         newEv->func = departQueueEvent;
         event_enqueue(newEv, &eventTree);
     }
@@ -114,6 +127,7 @@ static void arriveAtQueueEvent(Event* ev) {
 };
 
 static void departQueueEvent(Event* ev) {
+    q.pop();
     // make room for new file in cache
     while (cacheContents + files[ev->index].getSize() > (*params)["C"].asFloat()) {
         cacheContents -= files[cache.front()].getSize();
@@ -128,6 +142,7 @@ static void departQueueEvent(Event* ev) {
     Event* newEv = new Event();
     newEv->index = ev->index;
     newEv->key = ev->key + files[ev->index].getSize() / (*params)["inBand"].asFloat();
+    newEv->startTime = ev->startTime;
     newEv->func = fileReceivedEvent;
     event_enqueue(newEv, &eventTree);
     // depart the next item from queue
@@ -136,6 +151,7 @@ static void departQueueEvent(Event* ev) {
         Event* newEv = new Event();
         newEv->index = front->index;
         newEv->key = front->key + files[front->index].getSize() / (*params)["accBand"].asFloat();
+        newEv->startTime = ev->startTime;
         newEv->func = departQueueEvent;
         event_enqueue(newEv, &eventTree);
     }
