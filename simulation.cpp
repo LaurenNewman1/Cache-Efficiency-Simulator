@@ -13,6 +13,7 @@
 #include "logger/Logger.h"
 #include "event.h"
 #include "event.cpp"
+#include "request.h"
 using namespace std;
 
 void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm) {
@@ -32,13 +33,17 @@ void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger
     discrete_distribution<int> fileSelect(probs.begin(), probs.end());
 
     // Generate request events
+    int idGen = 0;
     int reqPerSec = poisson(gen);
     for (int sec = 0; sec < (*params)["totalTime"].asFloat(); sec++) {
         for (int req = 0; req < reqPerSec; req++) {
+            Request* request = new Request();
+            request->id = idGen++;
+            request->index = fileSelect(gen);
+            request->startTime = float(sec);
             Event* ev = new Event();
-            ev->index = fileSelect(gen);
-            ev->key = sec;
-            ev->startTime = sec;
+            ev->req = request;
+            ev->key = float(sec);
             ev->func = newRequestEvent;
             event_enqueue(ev, &eventTree);
         }
@@ -52,7 +57,7 @@ void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger
             break;
         }
         currTime = ev->key;
-        (*(ev->func))(ev);
+        (*(ev->func))(ev->req);
     }
 
     logger->info("Reached the end of totalTime parameter. Simulation ended.");
@@ -77,28 +82,26 @@ static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, str
     event_queue_init(&eventTree);
 }
 
-static void newRequestEvent(Event* ev) {
+static void newRequestEvent(Request* r) {
     // if in cache, retrieve file
-    if (find(cache.begin(), cache.end(), ev->index) != cache.end()) {
-        logger->info(getLogMessage(ev, 0));
+    if (find(cache.begin(), cache.end(), r->index) != cache.end()) {
+        logger->info(getLogMessage(r, 0));
         Event* newEv = new Event();
-        newEv->index = ev->index;
-        newEv->key = ev->key + files[ev->index].getSize() / (*params)["inBand"].asFloat();
-        newEv->startTime = ev->startTime;
+        newEv->req = r;
+        newEv->key = currTime + files[r->index].getSize() / (*params)["inBand"].asFloat();
         newEv->func = fileReceivedEvent;
         event_enqueue(newEv, &eventTree);
     }
     // if not in cache, retrieve from origin to queue
     else {
-        logger->info(getLogMessage(ev, 1));
+        logger->info(getLogMessage(r, 1));
         unsigned seed = chrono::system_clock::now().time_since_epoch().count();
         default_random_engine gen(seed);
         Json::Value prop = (*params)["prop"];
         lognormal_distribution<float> propTime(prop["mean"].asFloat(), prop["sd"].asFloat()); // mean, SD  in nanoseconds
         Event* newEv = new Event();
-        newEv->index = ev->index;
-        newEv->key = ev->key + propTime(gen);
-        newEv->startTime = ev->startTime;
+        newEv->req = r;
+        newEv->key = currTime + propTime(gen);
         newEv->func = arriveAtQueueEvent;
         event_enqueue(newEv, &eventTree);
 
@@ -112,59 +115,58 @@ static void newRequestEvent(Event* ev) {
     }
 };
 
-static void fileReceivedEvent(Event* ev) {
-    logger->info(getLogMessage(ev, 2));
-    responses.insert(std::pair<int, float>(ev->index, currTime - ev->startTime));
+static void fileReceivedEvent(Request* r) {
+    logger->info(getLogMessage(r, 2));
+    responses.insert(std::pair<int, float>(r->index, currTime - r->startTime));
 };
 
-static void arriveAtQueueEvent(Event* ev) {
+static void arriveAtQueueEvent(Request* r) {
     // if nothing in queue, depart
     if (q.empty()) {
-        q.push(ev);
-        logger->info(getLogMessage(ev, 3));
+        q.push(r);
+        logger->info(getLogMessage(r, 3));
         Event* newEv = new Event();
-        newEv->index = ev->index;
-        newEv->key = ev->key + files[ev->index].getSize() / (*params)["accBand"].asFloat();
-        newEv->startTime = ev->startTime;
+        newEv->req = r;
+        newEv->key = currTime + files[r->index].getSize() / (*params)["accBand"].asFloat();
         newEv->func = departQueueEvent;
         event_enqueue(newEv, &eventTree);
     }
     // else, add to queue
     else {
-        q.push(ev);
-        logger->info(getLogMessage(ev, 4));
+        q.push(r);
+        logger->info(getLogMessage(r, 4));
     }
 };
 
-static void departQueueEvent(Event* ev) {
+static void departQueueEvent(Request* r) {
+    Request* front = q.front();
     q.pop();
     // make room for new file in cache
-    while (cacheContents + files[ev->index].getSize() > (*params)["C"].asFloat()) {
+    while (cacheContents + files[front->index].getSize() > (*params)["C"].asFloat()) {
         switch (algorithm) {
             case oldestfirst: {
                 oldestFirst();
             }
         }
-        logger->info(getLogMessage(ev, 5));
+        logger->info(getLogMessage(front, 5));
     }
     // add to cache
-    cache.push_back(ev->index);
-    cacheContents += files[ev->index].getSize();
-    logger->info(getLogMessage(ev, 6));
+    cache.push_back(front->index);
+    cacheContents += files[front->index].getSize();
+    logger->info(getLogMessage(front, 6));
     // send to user
     Event* newEv = new Event();
-    newEv->index = ev->index;
-    newEv->key = ev->key + files[ev->index].getSize() / (*params)["inBand"].asFloat();
-    newEv->startTime = ev->startTime;
+    newEv->req = r;
+    newEv->key = currTime + files[front->index].getSize() / (*params)["inBand"].asFloat();
     newEv->func = fileReceivedEvent;
     event_enqueue(newEv, &eventTree);
     // depart the next item from queue
+    // error here
     if (!q.empty()) {
-        Event* front = q.front();
+        Request* front = q.front();
         Event* newEv = new Event();
-        newEv->index = front->index;
-        newEv->key = front->key + files[front->index].getSize() / (*params)["accBand"].asFloat();
-        newEv->startTime = ev->startTime;
+        newEv->req = front;
+        newEv->key = currTime;
         newEv->func = departQueueEvent;
         event_enqueue(newEv, &eventTree);
     }
@@ -175,7 +177,7 @@ static void oldestFirst() {
     cache.erase(cache.begin());
 }
 
-static string getLogMessage(Event* ev, int type) {
+static string getLogMessage(Request* ev, int type) {
     stringstream log;
     switch (type) {
         case 0:

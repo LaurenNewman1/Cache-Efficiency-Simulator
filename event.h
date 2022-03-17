@@ -1,5 +1,6 @@
 #pragma once
 #include "splay/splay.h"
+#include "request.h"
 
 typedef struct Event_Struct {
     struct Event_Struct *next;          /* link events into list */
@@ -9,7 +10,8 @@ typedef struct Event_Struct {
     double              key;            /* timer value    */
 
     int index; // file
-    void (*func)(struct Event_Struct *); 
+    void (*func)(Request *); 
     float startTime;
     float responseTime;
+    Request* req;
 } Event;

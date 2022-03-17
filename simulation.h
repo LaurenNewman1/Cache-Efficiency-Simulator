@@ -17,7 +17,7 @@ static File* files;
 static Json::Value* params;
 static vector<int> cache;      // list of i in the cache
 static float cacheContents;
-static queue<Event*> q;       // list of i waiting at access queue
+static queue<Request*> q;       // list of i waiting at access queue
 static CPlusPlusLogging::Logger* logger;
 
 static Event_Struct *eventTree;
@@ -26,12 +26,12 @@ static std::multimap<int, float> responses;
 
 static void initialize(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string a);
 
-static void newRequestEvent(Event* ev);
-static void fileReceivedEvent(Event* ev);
-static void arriveAtQueueEvent(Event* ev);
-static void departQueueEvent(Event* ev);
+static void newRequestEvent(Request* r);
+static void fileReceivedEvent(Request* r);
+static void arriveAtQueueEvent(Request* r);
+static void departQueueEvent(Request* r);
 
-static string getLogMessage(Event* ev, int type);
+static string getLogMessage(Request* ev, int type);
 
 void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm);
 
