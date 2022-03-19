@@ -79,6 +79,9 @@ static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, str
     if (a == "oldestfirst") {
         algorithm = oldestfirst;
     }
+    else if (a == "largestfirst") {
+        algorithm = largestfirst;
+    }
     event_queue_init(&eventTree);
 }
 
@@ -143,13 +146,17 @@ static void departQueueEvent(Request* r) {
     q.pop();
     // make room for new file in cache
     while (cacheContents + files[front->index].getSize() > (*params)["C"].asFloat()) {
+        logger->info(getLogMessage(front, 5));
         switch (algorithm) {
             case oldestfirst: {
                 oldestFirst();
             }
+            case largestfirst: {
+                largestFirst();
+            }
         }
-        logger->info(getLogMessage(front, 5));
     }
+    // Weird make error happens here // this is last log
     // add to cache
     cache.push_back(front->index);
     cacheContents += files[front->index].getSize();
@@ -175,7 +182,14 @@ static void departQueueEvent(Request* r) {
 static void oldestFirst() {
     cacheContents -= files[cache.front()].getSize();
     cache.erase(cache.begin());
-}
+};
+
+static void largestFirst() {
+    int min = *min_element(cache.begin(), cache.end()); // smaller the index, larger the file
+    cacheContents -= files[min].getSize();
+    vector<int>::iterator it = std::find(cache.begin(), cache.end(), min);
+    cache.erase(cache.begin() + distance(cache.begin(), it));
+};
 
 static string getLogMessage(Request* ev, int type) {
     stringstream log;

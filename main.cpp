@@ -13,7 +13,7 @@
 using namespace std;
 
 void initializeFiles(File* files, int N);
-void printFiles(File* files, int N);
+string printFiles(File* files, int N);
 float normalize(int x);
 Json::Value* readParameters(string filename);
 
@@ -44,14 +44,20 @@ int main (int argc, char *argv[]) {
 
     initializeFiles(files, params["N"].asInt());
 
+    logger->info("Files initialized according to Pareto distribution");
+    logger->info(printFiles(files, params["N"].asInt()));
+
     if (string(argv[2]) == "oldestfirst") {
+        logger->info("Starting simulation: oldest first...");
         simulate(files, &params, logger, "oldestfirst");
+    }
+    else if (string(argv[2]) == "largestfirst") {
+        logger->info("Starting simulation: largest first...");
+        simulate(files, &params, logger, "largestfirst");
     }
     else {
         cout << "Error: Invalid replacement algorith. Try \"oldestfirst\"" << endl;
     }
-
-    //printFiles(files, N);
 
     return 0;
 }
@@ -78,10 +84,13 @@ void initializeFiles(File* files, int N) {
     }
 }
 
-void printFiles(File* files, int N) {
+string printFiles(File* files, int N) {
+    stringstream log;
     for (int i = 0; i < N; i++) {
-        cout << "File " << i << ": " << files[i].getSize() << ", " << files[i].getPopularity() << endl;
+        log << "File " << i << ": size = " << files[i].getSize() 
+            << ", popularity = " << files[i].getPopularity() << endl;
     }
+    return log.str();
 }
 
 float normalize(int x) {
