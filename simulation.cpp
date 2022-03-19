@@ -75,7 +75,6 @@ static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, str
     params = p;
     logger = l;
     currTime = 0.0;
-    cacheContents = 0.0;
     if (a == "oldestfirst") {
         algorithm = oldestfirst;
     }
@@ -154,7 +153,7 @@ static void departQueueEvent(Request* r) {
     Request* front = q.front();
     q.pop();
     // make room for new file in cache
-    while (cacheContents + files[front->index].getSize() > (*params)["C"].asFloat()) {
+    while (getCacheSize() + files[front->index].getSize() > (*params)["C"].asFloat()) {
         logger->info(getLogMessage(front, 5));
         switch (algorithm) {
             case oldestfirst: {
@@ -171,7 +170,6 @@ static void departQueueEvent(Request* r) {
     // Weird make error happens here // this is last log
     // add to cache
     cache.push_back(front->index);
-    cacheContents += files[front->index].getSize();
     logger->info(getLogMessage(front, 6));
     // send to user
     Event* newEv = new Event();
@@ -180,7 +178,6 @@ static void departQueueEvent(Request* r) {
     newEv->func = fileReceivedEvent;
     event_enqueue(newEv, &eventTree);
     // depart the next item from queue
-    // error here
     if (!q.empty()) {
         Request* front = q.front();
         Event* newEv = new Event();
@@ -192,21 +189,26 @@ static void departQueueEvent(Request* r) {
 };
 
 static void oldestFirst() {
-    cacheContents -= files[cache.front()].getSize();
     cache.erase(cache.begin());
 };
 
 static void largestFirst() {
     int min = *min_element(cache.begin(), cache.end()); // smaller the index, larger the file
-    cacheContents -= files[min].getSize();
     vector<int>::iterator it = std::find(cache.begin(), cache.end(), min);
     cache.erase(cache.begin() + distance(cache.begin(), it));
 };
 
 static void leastRecent() {
-    cacheContents -= files[cache.front()].getSize();
     cache.erase(cache.begin());
 };
+
+static float getCacheSize() {
+    float cacheContents = 0.0;
+    for (int i = 0; i < cache.size(); i++) {
+        cacheContents += files[cache.at(i)].getSize();
+    }
+    return cacheContents;
+}
 
 static string getLogMessage(Request* ev, int type) {
     stringstream log;

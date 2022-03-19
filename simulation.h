@@ -16,7 +16,6 @@ static int algorithm;
 static File* files;
 static Json::Value* params;
 static vector<int> cache;      // list of i in the cache
-static float cacheContents;
 static queue<Request*> q;       // list of i waiting at access queue
 static CPlusPlusLogging::Logger* logger;
 
@@ -38,3 +37,5 @@ void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger
 static void oldestFirst();
 static void largestFirst();
 static void leastRecent();
+
+static float getCacheSize();
