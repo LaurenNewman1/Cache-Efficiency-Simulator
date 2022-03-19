@@ -9,7 +9,7 @@
 #include "event.h"
 using namespace std;
 
-enum Algorithm { oldestfirst, largestfirst };
+enum Algorithm { oldestfirst, largestfirst, leastrecent };
 
 static float currTime;
 static int algorithm;
@@ -37,3 +37,4 @@ void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger
 
 static void oldestFirst();
 static void largestFirst();
+static void leastRecent();

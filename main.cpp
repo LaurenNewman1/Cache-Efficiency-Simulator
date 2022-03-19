@@ -55,6 +55,10 @@ int main (int argc, char *argv[]) {
         logger->info("Starting simulation: largest first...");
         simulate(files, &params, logger, "largestfirst");
     }
+    else if (string(argv[2]) == "leastrecent") {
+        logger->info("Starting simulation: least recent...");
+        simulate(files, &params, logger, "leastrecent");
+    }
     else {
         cout << "Error: Invalid replacement algorith. Try \"oldestfirst\"" << endl;
     }

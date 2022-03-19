@@ -82,13 +82,22 @@ static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, str
     else if (a == "largestfirst") {
         algorithm = largestfirst;
     }
+    else if (a == "leastrecent") {
+        algorithm = leastrecent;
+    }
     event_queue_init(&eventTree);
 }
 
 static void newRequestEvent(Request* r) {
     // if in cache, retrieve file
-    if (find(cache.begin(), cache.end(), r->index) != cache.end()) {
+    vector<int>::iterator found = find(cache.begin(), cache.end(), r->index);
+    if (found != cache.end()) {
         logger->info(getLogMessage(r, 0));
+        // if least recent, move recent request to the back
+        if (algorithm == leastrecent) {
+            cache.erase(cache.begin() + distance(cache.begin(), found));
+            cache.push_back(r->index);
+        }
         Event* newEv = new Event();
         newEv->req = r;
         newEv->key = currTime + files[r->index].getSize() / (*params)["inBand"].asFloat();
@@ -154,6 +163,9 @@ static void departQueueEvent(Request* r) {
             case largestfirst: {
                 largestFirst();
             }
+            case leastrecent: {
+                leastRecent();
+            }
         }
     }
     // Weird make error happens here // this is last log
@@ -189,6 +201,11 @@ static void largestFirst() {
     cacheContents -= files[min].getSize();
     vector<int>::iterator it = std::find(cache.begin(), cache.end(), min);
     cache.erase(cache.begin() + distance(cache.begin(), it));
+};
+
+static void leastRecent() {
+    cacheContents -= files[cache.front()].getSize();
+    cache.erase(cache.begin());
 };
 
 static string getLogMessage(Request* ev, int type) {
