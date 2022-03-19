@@ -8,6 +8,7 @@
 #include <queue>
 #include <chrono>
 #include <array>
+#include <numeric>
 #include <string>
 #include "json/json.h"
 #include "logger/Logger.h"
@@ -68,9 +69,11 @@ void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger
         log << "{" << pair.first << ": " << pair.second << "}\n";
     }
     logger->info(log.str());
+
+    getAvgResponseTime();
 };
 
-static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, string a) {
+void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, string a) {
     files = f;
     params = p;
     logger = l;
@@ -88,14 +91,14 @@ static void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, str
 }
 
 static void newRequestEvent(Request* r) {
-    // if in cache, retrieve file
-    vector<int>::iterator found = find(cache.begin(), cache.end(), r->index);
-    if (found != cache.end()) {
+    // if in cach, retrieve file
+    vector<int>::iterator found = find(cach.begin(), cach.end(), r->index);
+    if (found != cach.end()) {
         logger->info(getLogMessage(r, 0));
         // if least recent, move recent request to the back
         if (algorithm == leastrecent) {
-            cache.erase(cache.begin() + distance(cache.begin(), found));
-            cache.push_back(r->index);
+            cach.erase(cach.begin() + distance(cach.begin(), found));
+            cach.push_back(r->index);
         }
         Event* newEv = new Event();
         newEv->req = r;
@@ -103,7 +106,7 @@ static void newRequestEvent(Request* r) {
         newEv->func = fileReceivedEvent;
         event_enqueue(newEv, &eventTree);
     }
-    // if not in cache, retrieve from origin to queue
+    // if not in cach, retrieve from origin to queue
     else {
         logger->info(getLogMessage(r, 1));
         unsigned seed = chrono::system_clock::now().time_since_epoch().count();
@@ -152,24 +155,21 @@ static void arriveAtQueueEvent(Request* r) {
 static void departQueueEvent(Request* r) {
     Request* front = q.front();
     q.pop();
-    // make room for new file in cache
+    // make room for new file in cach
     while (getCacheSize() + files[front->index].getSize() > (*params)["C"].asFloat()) {
         logger->info(getLogMessage(front, 5));
-        switch (algorithm) {
-            case oldestfirst: {
-                oldestFirst();
-            }
-            case largestfirst: {
-                largestFirst();
-            }
-            case leastrecent: {
-                leastRecent();
-            }
+        if (algorithm == oldestfirst) {
+            oldestFirst();
+        }
+        else if (algorithm == largestfirst) {
+            largestFirst();
+        }
+        else if (algorithm == leastrecent) {
+            leastRecent();
         }
     }
-    // Weird make error happens here // this is last log
     // add to cache
-    cache.push_back(front->index);
+    cach.push_back(front->index);
     logger->info(getLogMessage(front, 6));
     // send to user
     Event* newEv = new Event();
@@ -188,29 +188,29 @@ static void departQueueEvent(Request* r) {
     }
 };
 
-static void oldestFirst() {
-    cache.erase(cache.begin());
+void oldestFirst() {
+    cach.erase(cach.begin());
 };
 
-static void largestFirst() {
-    int min = *min_element(cache.begin(), cache.end()); // smaller the index, larger the file
-    vector<int>::iterator it = std::find(cache.begin(), cache.end(), min);
-    cache.erase(cache.begin() + distance(cache.begin(), it));
+void largestFirst() {
+    int min = *min_element(cach.begin(), cach.end()); // smaller the index, larger the file
+    vector<int>::iterator it = std::find(cach.begin(), cach.end(), min);
+    cach.erase(cach.begin() + distance(cach.begin(), it));
 };
 
-static void leastRecent() {
-    cache.erase(cache.begin());
+void leastRecent() {
+    cach.erase(cach.begin());
 };
 
-static float getCacheSize() {
+float getCacheSize() {
     float cacheContents = 0.0;
-    for (int i = 0; i < cache.size(); i++) {
-        cacheContents += files[cache.at(i)].getSize();
+    for (int i = 0; i < cach.size(); i++) {
+        cacheContents += files[cach.at(i)].getSize();
     }
     return cacheContents;
 }
 
-static string getLogMessage(Request* ev, int type) {
+string getLogMessage(Request* ev, int type) {
     stringstream log;
     switch (type) {
         case 0:
@@ -243,4 +243,12 @@ static string getLogMessage(Request* ev, int type) {
             break;
     }
     return log.str();
+}
+
+float getAvgResponseTime() {
+    vector<float> times;
+    for (auto const &pair: responses) {
+        times.push_back(pair.second);
+    }
+    return accumulate(times.begin(), times.end(), 0.0) / times.size();
 }
