@@ -70,6 +70,20 @@ int main (int argc, char *argv[]) {
         log << "Average response time: " << avg << " seconds" << endl;
         logger->info(log.str());
     }
+    else if (string(argv[2]) == "all") {
+        logger->info("Starting simulation (1/3): oldest first...");
+        float avgOld = simulate(files, &params, logger, "oldestfirst");
+        logger->info("Starting simulation (2/3): largest first...");
+        float avgLarge = simulate(files, &params, logger, "largestfirst");
+        logger->info("Starting simulation (3/3): least recent...");
+        float avgLeast = simulate(files, &params, logger, "leastrecent");
+        stringstream log;
+        log << "Statistics\n"
+            << "Oldest First: " << "\n\tAverage response time: " << avgOld << " seconds\n"
+            << "Largest First: " << "\n\tAverage response time: " << avgLarge << " seconds\n"
+            << "Least Recent: " << "\n\tAverage response time: " << avgLeast << " seconds\n";
+        logger->info(log.str());
+    }
     else {
         cout << "Error: Invalid replacement algorith. Try \"oldestfirst\"" << endl;
     }

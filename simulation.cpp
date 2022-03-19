@@ -87,6 +87,10 @@ void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, string a) 
     else if (a == "leastrecent") {
         algorithm = leastrecent;
     }
+    cach.clear();
+    queue<Request*> empty;
+    swap(q, empty);
+    responses.clear();
     event_queue_init(&eventTree);
 }
 
