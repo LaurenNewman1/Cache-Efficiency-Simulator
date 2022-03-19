@@ -32,7 +32,7 @@ static void departQueueEvent(Request* r);
 
 string getLogMessage(Request* ev, int type);
 
-void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm);
+float simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm);
 
 void oldestFirst();
 void largestFirst();

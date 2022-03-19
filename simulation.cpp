@@ -17,7 +17,7 @@
 #include "request.h"
 using namespace std;
 
-void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm) {
+float simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger, string algorithm) {
 
     initialize(files, params, logger, algorithm);
 
@@ -70,7 +70,7 @@ void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger
     }
     logger->info(log.str());
 
-    getAvgResponseTime();
+    return getAvgResponseTime();
 };
 
 void initialize(File* f, Json::Value* p, CPlusPlusLogging::Logger* l, string a) {

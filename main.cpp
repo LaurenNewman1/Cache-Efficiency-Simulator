@@ -47,21 +47,34 @@ int main (int argc, char *argv[]) {
     logger->info("Files initialized according to Pareto distribution");
     logger->info(printFiles(files, params["N"].asInt()));
 
+    cout << "Starting simulation. See out/log.log for a complete output." << endl;
+
     if (string(argv[2]) == "oldestfirst") {
         logger->info("Starting simulation: oldest first...");
-        simulate(files, &params, logger, "oldestfirst");
+        float avg = simulate(files, &params, logger, "oldestfirst");
+        stringstream log;
+        log << "Average response time: " << avg << " seconds" << endl;
+        logger->info(log.str());
     }
     else if (string(argv[2]) == "largestfirst") {
         logger->info("Starting simulation: largest first...");
-        simulate(files, &params, logger, "largestfirst");
+        float avg = simulate(files, &params, logger, "largestfirst");
+        stringstream log;
+        log << "Average response time: " << avg << " seconds" << endl;
+        logger->info(log.str());
     }
     else if (string(argv[2]) == "leastrecent") {
         logger->info("Starting simulation: least recent...");
-        simulate(files, &params, logger, "leastrecent");
+        float avg = simulate(files, &params, logger, "leastrecent");
+        stringstream log;
+        log << "Average response time: " << avg << " seconds" << endl;
+        logger->info(log.str());
     }
     else {
         cout << "Error: Invalid replacement algorith. Try \"oldestfirst\"" << endl;
     }
+
+    cout << "Simulation completed successfully." << endl;
 
     return 0;
 }
