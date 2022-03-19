@@ -40,10 +40,10 @@ void simulate(File* files, Json::Value* params, CPlusPlusLogging::Logger* logger
             Request* request = new Request();
             request->id = idGen++;
             request->index = fileSelect(gen);
-            request->startTime = float(sec);
+            request->startTime = float(sec) + req / float(reqPerSec);;
             Event* ev = new Event();
             ev->req = request;
-            ev->key = float(sec);
+            ev->key = float(sec) + req / float(reqPerSec);;
             ev->func = newRequestEvent;
             event_enqueue(ev, &eventTree);
         }
