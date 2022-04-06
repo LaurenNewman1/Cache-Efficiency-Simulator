@@ -12,7 +12,7 @@
 #include "logger/Logger.h"
 using namespace std;
 
-void initializeFiles(File* files, int N);
+void initializeFiles(File* files, Json::Value* params);
 string printFiles(File* files, int N);
 float normalize(int x);
 Json::Value* readParameters(string filename);
@@ -42,7 +42,7 @@ int main (int argc, char *argv[]) {
 
     File* files = new File[params["N"].asInt()];            // list of files
 
-    initializeFiles(files, params["N"].asInt());
+    initializeFiles(files, &params);
 
     logger->info("Files initialized according to Pareto distribution");
     logger->info(printFiles(files, params["N"].asInt()));
@@ -93,11 +93,13 @@ int main (int argc, char *argv[]) {
     return 0;
 }
 
-void initializeFiles(File* files, int N) {
-    float alphaS = 2.0;
-    float alphaP = 1.1;
-    float modeS = 5.0;
-    float modeP = 10.0;
+void initializeFiles(File* files, Json::Value* params) {
+    Json::Value pareto = (*params)["pareto"];
+    int N = (*params)["N"].asInt();
+    float alphaS = pareto["meanS"].asFloat();
+    float alphaP = pareto["meanP"].asFloat();
+    float modeS = pareto["modeS"].asFloat();
+    float modeP = pareto["modeP"].asFloat();
     float sumq = 0.0f;
     // Initialize sizes
     for (int i = 0; i < N; i++) {

@@ -2,13 +2,20 @@
     "N": 1000,
     "C": 50,
     "lambda": 10,
-    "accBand": 10.0,
+    "accBand": 15.0,
     "inBand": 100.0,
     "transRate": 20.0,
-    "totalTime": 50.0,
+    "totalTime": 1000.0,
     "propTime":
     {
-        "mean": 0.0,
-        "sd": 1.0
+        "mean": 0.5,
+        "sd": 0.4
+    },
+    "pareto":
+    {
+        "meanS": 2.0,
+        "meanP": 1.1,
+        "modeS": 5.0,
+        "modeP": 10.0
     }
 }
